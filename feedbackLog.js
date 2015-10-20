@@ -255,7 +255,105 @@ FeedbackLog.prototype.finishSnapTest = function(test, output) {
 		}
 	}
 	// Addison's Code Here
+	SyntaxElementMorph.prototype.returnBubble = function (value, exportPic) {
+	    var bubble,
+	        txt,
+	        img,
+	        morphToShow,
+	        isClickable = false,
+	        sf = this.parentThatIsA(ScrollFrameMorph),
+	        wrrld = this.world();
 
+	    if ((value === undefined) || !wrrld) {
+	        return null;
+	    }
+	    if (value instanceof ListWatcherMorph) {
+	        morphToShow = value;
+	        morphToShow.update(true);
+	        morphToShow.step = value.update;
+	        morphToShow.isDraggable = false;
+	        isClickable = true;
+	    } else if (value instanceof Morph) {
+	        img = value.fullImage();
+	        morphToShow = new Morph();
+	        morphToShow.silentSetWidth(img.width);
+	        morphToShow.silentSetHeight(img.height);
+	        morphToShow.image = img;
+	    } else if (value instanceof Costume) {
+	        img = value.thumbnail(new Point(40, 40));
+	        morphToShow = new Morph();
+	        morphToShow.silentSetWidth(img.width);
+	        morphToShow.silentSetHeight(img.height);
+	        morphToShow.image = img;
+	    } else if (value instanceof Context) {
+	        img = value.image();
+	        morphToShow = new Morph();
+	        morphToShow.silentSetWidth(img.width);
+	        morphToShow.silentSetHeight(img.height);
+	        morphToShow.image = img;
+	    } else if (typeof value === 'boolean') {
+	        morphToShow = SpriteMorph.prototype.booleanMorph.call(
+	            null,
+	            value
+	        );
+	    } else if (isString(value)) {
+	        txt  = value.length > 500 ? value.slice(0, 500) + '...' : value;
+	        morphToShow = new TextMorph(
+	            txt,
+	            this.fontSize
+	        );
+	    } else if (value === null) {
+	        morphToShow = new TextMorph(
+	            '',
+	            this.fontSize
+	        );
+	    } else if (value === 0) {
+	        morphToShow = new TextMorph(
+	            '0',
+	            this.fontSize
+	        );
+	    } else if (value.toString) {
+	        morphToShow = new TextMorph(
+	            value.toString(),
+	            this.fontSize
+	        );
+	    }
+	    bubble = new SpeechBubbleMorph(
+	        morphToShow,
+	        null,
+	        Math.max(this.rounding - 2, 6),
+	        0
+	    );
+	    bubble.popUp(
+	        wrrld,
+	        this.rightCenter().add(new Point(2, 0)),
+	        isClickable
+	    );
+	    if (exportPic) {
+	        return this.returnPictureWithResult(bubble);
+	    }
+	    if (sf) {
+	        bubble.keepWithin(sf);
+	    }
+	};
+
+	SyntaxElementMorph.prototype.returnPictureWithResult = function (aBubble) {
+	    var scr = this.fullImage(),
+	        bub = aBubble.fullImageClassic(),
+	        taller = Math.max(0, bub.height - scr.height),
+	        pic = newCanvas(new Point(
+	            scr.width + bub.width + 2,
+	            scr.height + taller
+	        )),
+	        ctx = pic.getContext('2d');
+	    ctx.drawImage(scr, 0, pic.height - scr.height);
+	    ctx.drawImage(bub, scr.width + 2, 0);
+	    return pic
+	};
+	var myscript = getScript(test.blockSpec);
+	var pic = myscript.returnBubble(output, true);
+	console.log(pic);
+	//End of Addison's Section
 
 	var expOut = test.expOut;
 	if (expOut instanceof Function) {
