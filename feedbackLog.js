@@ -254,8 +254,9 @@ FeedbackLog.prototype.finishSnapTest = function(test, output) {
 			test.output = output;
 		}
 	}
+
 	// Addison's Code Here
-	SyntaxElementMorph.prototype.returnBubble = function (value, exportPic) {
+	SyntaxElementMorph.prototype.returnBubble = function (value) {
 	    var bubble,
 	        txt,
 	        img,
@@ -329,12 +330,7 @@ FeedbackLog.prototype.finishSnapTest = function(test, output) {
 	        this.rightCenter().add(new Point(2, 0)),
 	        isClickable
 	    );
-	    if (exportPic) {
-	        return this.returnPictureWithResult(bubble);
-	    }
-	    if (sf) {
-	        bubble.keepWithin(sf);
-	    }
+	    return this.returnPictureWithResult(bubble);
 	};
 
 	SyntaxElementMorph.prototype.returnPictureWithResult = function (aBubble) {
@@ -350,9 +346,24 @@ FeedbackLog.prototype.finishSnapTest = function(test, output) {
 	    ctx.drawImage(bub, scr.width + 2, 0);
 	    return pic
 	};
-	var myscript = getScript(test.blockSpec);
-	var pic = myscript.returnBubble(output, true);
+
+	var scriptToExport = getScript(test.blockSpec);
+	
+	if (output instanceof List) {
+		var pic = scriptToExport.returnBubble(new ListWatcherMorph(output));
+	} else {
+		var pic = scriptToExport.returnBubble(output);
+	};
+
+	if (test.expOut instanceof List) {
+		var expPic = scriptToExport.returnBubble(new ListWatcherMorph(test.expOut));
+	} else {
+		var expPic = scriptToExport.returnBubble(test.expOut);
+	};
 	console.log(pic);
+	console.log(expPic);
+	test.picture = pic;
+	test.expectedPicture = expPic
 	//End of Addison's Section
 
 	var expOut = test.expOut;
